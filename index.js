@@ -1,5 +1,4 @@
 const express = require('express');
-const { WebSocketServer } = require('ws');
 const cors = require('cors');
 
 const app = express();
@@ -8,23 +7,16 @@ app.use(express.json());
 
 let votes = { jury: {}, peer: {} };
 
-// Regular HTTP endpoint
-app.get('/', (req, res) => {
-  res.send('Server is running');
-});
-
-// Get current votes
+// Get votes
 app.get('/votes', (req, res) => {
   res.json(votes);
 });
 
-// Update votes
+// Cast vote
 app.post('/vote', (req, res) => {
-  const { voterType, voterName, selectedTeam } = req.body;
-  if (!votes[voterType]) {
-    votes[voterType] = {};
-  }
-  votes[voterType][voterName] = selectedTeam;
+  const { type, name, selectedTeam } = req.body;
+  if (!votes[type]) votes[type] = {};
+  votes[type][name] = selectedTeam;
   res.json(votes);
 });
 
@@ -34,42 +26,11 @@ app.post('/reset', (req, res) => {
   res.json(votes);
 });
 
-const server = app.listen(process.env.PORT || 3001, () => {
-  console.log(`Server running on port ${process.env.PORT || 3001}`);
+app.get('/', (req, res) => {
+  res.send('Server is running');
 });
 
-const wss = new WebSocketServer({ server });
-
-wss.on('connection', (ws) => {
-  console.log('Client connected');
-  
-  // Send current votes to new client
-  ws.send(JSON.stringify({ type: 'votes', data: votes }));
-
-  ws.on('message', (message) => {
-    try {
-      console.log('Received:', message.toString());
-      const data = JSON.parse(message);
-      
-      if (data.type === 'vote') {
-        votes = data.votes;
-        // Broadcast to all clients
-        wss.clients.forEach(client => {
-          client.send(JSON.stringify({ type: 'votes', data: votes }));
-        });
-      } else if (data.type === 'reset') {
-        votes = { jury: {}, peer: {} };
-        // Broadcast reset
-        wss.clients.forEach(client => {
-          client.send(JSON.stringify({ type: 'votes', data: votes }));
-        });
-      }
-    } catch (error) {
-      console.error('Error processing message:', error);
-    }
-  });
-
-  ws.on('close', () => {
-    console.log('Client disconnected');
-  });
+const PORT = process.env.PORT || 3001;
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}`);
 });
