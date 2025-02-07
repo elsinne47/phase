@@ -36,3 +36,15 @@ wss.on('connection', (ws) => {
 app.get('/', (req, res) => {
   res.send('Server is running');
 });
+
+wss.on('connection', (ws) => {
+  console.log('New client connected');
+  
+  ws.on('message', (message) => {
+    console.log('Received message:', message.toString());
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
