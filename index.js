@@ -7,8 +7,15 @@ const app = express();
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type']
+  allowedHeaders: ['Content-Type'],
+  exposedHeaders: ['Content-Security-Policy']
 }));
+
+// Add these lines after the CORS middleware
+app.use((req, res, next) => {
+  res.setHeader('Content-Security-Policy', "connect-src 'self' https://phase-production.up.railway.app");
+  next();
+});
 
 app.use(express.json());
 
