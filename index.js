@@ -3,25 +3,26 @@ const cors = require('cors');
 
 const app = express();
 
-// Update CORS configuration
+// Enable CORS for all routes
 app.use(cors({
   origin: '*',
   methods: ['GET', 'POST', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization']
+  allowedHeaders: ['Content-Type']
 }));
 
 app.use(express.json());
-
 
 let votes = { jury: {}, peer: {} };
 
 // Get votes
 app.get('/votes', (req, res) => {
+  console.log('GET /votes request received');
   res.json(votes);
 });
 
 // Cast vote
 app.post('/vote', (req, res) => {
+  console.log('POST /vote request received:', req.body);
   const { type, name, selectedTeam } = req.body;
   if (!votes[type]) votes[type] = {};
   votes[type][name] = selectedTeam;
@@ -30,12 +31,13 @@ app.post('/vote', (req, res) => {
 
 // Reset votes
 app.post('/reset', (req, res) => {
+  console.log('POST /reset request received');
   votes = { jury: {}, peer: {} };
   res.json(votes);
 });
 
 app.get('/', (req, res) => {
-  res.send('Server is running');
+  res.send('Voting Server is running');
 });
 
 const PORT = process.env.PORT || 3001;
