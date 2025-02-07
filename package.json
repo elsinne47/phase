@@ -1,10 +1,11 @@
-{
-  "name": "voting-backend",
-  "version": "1.0.0",
-  "main": "index.js",
-  "dependencies": {
-    "cors": "^2.8.5",
-    "express": "^4.17.1",
-    "ws": "^8.2.3"
-  }
-}
+wss.on('connection', (ws) => {
+  console.log('New client connected');
+  
+  ws.on('message', (message) => {
+    console.log('Received message:', message.toString());
+  });
+
+  ws.on('close', () => {
+    console.log('Client disconnected');
+  });
+});
